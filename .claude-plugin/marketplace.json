@@ -1,0 +1,11 @@
+{
+  "name": "netrunner-deck",
+  "owner": { "name": "Iranman" },
+  "plugins": [
+    {
+      "name": "netrunner-deck",
+      "source": "./",
+      "description": "Night-city side pane: live subagent cards, side-by-side diffs, session CPU/RAM/GPU, highlighted key points and questions, sound FX"
+    }
+  ]
+}
