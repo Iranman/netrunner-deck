@@ -1,6 +1,6 @@
 {
   "name": "netrunner-deck",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Night-city side pane: live subagent cards, side-by-side diffs, session CPU/RAM/GPU, highlighted key points and questions, sound FX",
   "license": "MIT",
   "types": "./types/index.d.ts"

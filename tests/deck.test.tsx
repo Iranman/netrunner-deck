@@ -1,6 +1,6 @@
 import { expect, test } from 'claude-code/testing'
 
-import { cpuPct, layout, segments, spark } from '../hooks/register'
+import { cpuPct, layout, running, segments, spark } from '../hooks/register'
 
 test('long diff lines wrap instead of being cut, shared indent removed', async () => {
   const { lines, more } = layout([{ k: 'chg', l: '    abcdefghij', r: '    xyz' }], 4, 10)
@@ -14,6 +14,12 @@ test('cpu % and sparkline math', async () => {
   expect(cpuPct({ cpu: 0, ram: 0, gpu: 0, cores: 12, t: 0 }, { cpu: 6e7, ram: 0, gpu: 0, cores: 12, t: 1000 })).toBe(50)
   expect(cpuPct({ cpu: 9, ram: 0, gpu: 0, cores: 12, t: 0 }, { cpu: 1, ram: 0, gpu: 0, cores: 12, t: 1000 })).toBe(0)
   expect(spark([0, 10, 20])).toBe('▁▅█')
+})
+
+test('running line lists only what is in flight', async () => {
+  expect(running(null)).toBe('')
+  expect(running({ agents: 0, shells: 0, monitors: 0, other: 0, crons: 0, t: 0 })).toBe('')
+  expect(running({ agents: 3, shells: 1, monitors: 0, other: 0, crons: 1, t: 0 })).toBe('3 agents · 1 shell · 1 loop')
 })
 
 test('key points and questions are split out, code fences left alone', async () => {

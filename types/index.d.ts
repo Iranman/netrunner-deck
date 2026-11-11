@@ -22,7 +22,10 @@ export type Diff = {
 }
 
 /** Session resource use: cpu % of the whole machine, ram bytes, gpu % (-1 unknown), cpu history. */
-export type Stats = { cpu: number; ram: number; gpu: number; hist: number[] }
+export type Stats = { cpu: number; ram: number; gpu: number; hist: number[]; bg?: Bg | null }
+
+/** Background work as of the session's last turn (written by a Stop hook, when installed). */
+export type Bg = { agents: number; shells: number; monitors: number; other: number; crons: number; t: number }
 
 declare module 'claude-code' {
   interface PluginState {

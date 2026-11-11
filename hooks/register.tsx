@@ -1,7 +1,7 @@
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
-import type { Card, Diff, DiffRow, Stats } from '../types'
+import type { Bg, Card, Diff, DiffRow, Stats } from '../types'
 
 const PANE = 'netrunner-deck'
 const TITLE = 'Netrunner Deck'
@@ -36,7 +36,14 @@ const diff = atom({ plugin: 'netrunner-deck', key: 'diff' } as const, null as Di
 const sfx = atom({ plugin: 'netrunner-deck', key: 'sfx' } as const, true)
 const stats = atom({ plugin: 'netrunner-deck', key: 'stats' } as const, null as Stats | null, { shape: 'stats-1' })
 
-type Sample = { cpu: number; ram: number; gpu: number; cores: number; t: number }
+type Sample = { cpu: number; ram: number; gpu: number; cores: number; t: number; bg?: Bg | null }
+
+/** "3 agents · 1 shell" from the background-work record, or '' when nothing runs. */
+export function running(bg: Bg | null | undefined): string {
+  if (!bg) return ''
+  const parts: [number, string][] = [[bg.agents, 'agent'], [bg.shells, 'shell'], [bg.monitors, 'monitor'], [bg.other, 'task'], [bg.crons, 'loop']]
+  return parts.filter(([n]) => n > 0).map(([n, w]) => `${n} ${w}${n > 1 ? 's' : ''}`).join(' · ')
+}
 
 /** CPU % of the whole machine between two samples (cpu in 100ns ticks, t in ms). */
 export function cpuPct(a: Sample, b: Sample): number {
@@ -83,7 +90,7 @@ function startSampler($: EngineInterface) {
           prev = s
           if (!p) continue
           const cpu = cpuPct(p, s)
-          await update($, stats, old => ({ cpu, ram: s.ram, gpu: s.gpu, hist: [...(old?.hist ?? []), cpu].slice(-HIST) }))
+          await update($, stats, old => ({ cpu, ram: s.ram, gpu: s.gpu, hist: [...(old?.hist ?? []), cpu].slice(-HIST), bg: s.bg ?? null }))
         }
       }
     } catch {
@@ -415,6 +422,7 @@ export const register: Register = on => {
               <Text color={C.haiku} bold>  GPU {st.gpu < 0 ? '–' : `${Math.round(st.gpu)}%`}</Text>
             </Text>
           )}
+          {running(st?.bg) && <Text color={C.current} bold>⚠ RUNNING  {running(st?.bg)}  (close = kill)</Text>}
           {list.length === 0 && <Text color={C.muted}>No subagents jacked in. Waiting for a run…</Text>}
           {live.map(c => {
             const tr = tier(c.model)

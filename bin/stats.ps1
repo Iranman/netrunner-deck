@@ -31,8 +31,15 @@ function Sample([double]$gpu) {
       if ($kids.ContainsKey($id)) { foreach ($k in $kids[$id]) { $stack.Push($k) } }
     }
   }
+  # Background work as of the session's last turn, if a Stop hook records it
+  # (~/.claude/state/bg/<sessionId>.json, written by hooks/bg-state.mjs).
+  $bg = 'null'
+  try {
+    $sid = (Get-Content "$HOME\.claude\sessions\$root.json" -Raw -ErrorAction Stop | ConvertFrom-Json).sessionId
+    $bg = (Get-Content "$HOME\.claude\state\bg\$sid.json" -Raw -ErrorAction Stop).Trim()
+  } catch {}
   $t = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
-  [Console]::Out.WriteLine(('{{"cpu":{0},"ram":{1},"gpu":{2},"cores":{3},"t":{4}}}' -f $cpu, $ram, $gpu, $cores, $t))
+  [Console]::Out.WriteLine(('{{"cpu":{0},"ram":{1},"gpu":{2},"cores":{3},"t":{4},"bg":{5}}}' -f $cpu, $ram, $gpu, $cores, $t, $bg))
   [Console]::Out.Flush()
 }
 
